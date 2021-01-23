@@ -1,6 +1,7 @@
 from file_input.load_las import get_logs_collection, get_log_names
 import pandas as pd
 import os
+import numpy as np
 import pickle as pkl
 
 
@@ -24,13 +25,15 @@ if __name__ == '__main__':
                 'CALI', 'HCAL2R', 'HCAL', 'HCALS', 'CALX', 'CALSR', 'CAL1R'],
         'SAND_PHI': ['SPHI_SS', 'PHIX', 'DPHZ'],
         'DPHIS': ['DPHI', 'DPHI_SLDT', 'DPOR'],
-        'LS_PHI': ['PORZ_LS', 'DPHI_LS', 'SPHI_LS', 'TPHI_LS'],
-        'DPHIL': ['DPOR_LS', 'DPHZLS', 'TNPH_LS', 'DPHILS'],
-        'NPHIL': ['CNC_LS', 'NPORLS', 'NPHILS', 'NPHI_LS'],
+        # 'LS_PHI': ['PORZ_LS', 'DPHI_LS', 'SPHI_LS', 'TPHI_LS'],
+        # 'DPHIL': ['DPOR_LS', 'DPHZLS', 'TNPH_LS', 'DPHILS'],
+        # 'NPHIL': ['CNC_LS', 'NPORLS', 'NPHILS', 'NPHI_LS'],
         'GR_TH': ['THOR', 'GRT'],
         'GR_K': ['POTA'],
         'RHOB': ['RHOB_SLDT', 'ZDEN', 'RHOB'],
         'PEF': ['PEFL', 'PEFZ', 'PEF', 'PE'],
+        'md': ['md'],
+        'idx': ['idx']
     }
     if os.path.isfile('dataset.csv'):
         dataset_iterator = pd.read_csv('dataset.csv', chunksize=10000, iterator=True)
@@ -40,7 +43,50 @@ if __name__ == '__main__':
         for x in collection:
             print('next')
         dataset_iterator = pd.read_csv('dataset.csv', chunksize=10000, iterator=True)
+    processed_chunks = []
+    first = True
     for chunk in dataset_iterator:
-        print('here')
+        cols_with_data = []
+        rename_dict = {}
+        for col in chunk:
+            num_test = pd.to_numeric(chunk[col], errors='coerce').sum()
+            if num_test > 0:
+                continue
+            else:
+                cols_with_data.append(col)
+        temp_chunk = chunk[cols_with_data]
+        for col in cols_with_data:
+            for alias in alias_dict.keys():
+                if col in alias_dict[alias]:
+                    rename_dict[col] = alias
+        temp_chunk.rename(columns=rename_dict, inplace=True)
+        if sum(temp_chunk.columns.duplicated()) > 1:
+            cols = list(set(temp_chunk.columns[temp_chunk.columns.duplicated()]))
+            for col in cols:
+                df = temp_chunk[col]
+                temp_col = df.mean(axis=1)
+                temp_chunk.drop(columns=[col], inplace=True)
+                temp_chunk[col] = temp_col
+            # print('here')
+        for alias in alias_dict.keys():
+            if alias not in temp_chunk:
+                temp_chunk[alias] = np.nan
+        if first:
+            append = 'w'
+            columns = True
+            first = False
+        else:
+            append = 'a'
+            columns = False
+        drop_cols = []
+        for col in temp_chunk:
+            if col not in alias_dict.keys():
+                drop_cols.append(col)
+        output = temp_chunk.loc[~temp_chunk['DTSM'].isna()]
+        output.drop(columns=drop_cols, inplace=True)
+        for col in output:
+            output[col] = pd.to_numeric(output[col], errors='coerce')
+        if not output.empty:
+            output.to_csv('processed_data.csv', mode=append, header=columns, index=False)
     print('here')
 

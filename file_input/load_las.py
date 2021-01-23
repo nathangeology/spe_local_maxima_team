@@ -28,12 +28,14 @@ def load_las(filename, counter, col_list):
     print(counter)
     if counter == 0:
         mode = 'w'
+        columns = True
     else:
         mode = 'a'
+        columns = False
     for col in col_list:
         if col not in df:
             df[col] = np.nan
-    df.to_csv('dataset.csv', mode=mode, index=False)
+    df.to_csv('dataset.csv', mode=mode, index=False, header=False)
     return df
 
 
