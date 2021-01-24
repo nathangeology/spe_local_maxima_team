@@ -35,7 +35,7 @@ def load_las(filename, counter, col_list):
     for col in col_list:
         if col not in df:
             df[col] = np.nan
-    df.to_csv('dataset.csv', mode=mode, index=False, header=False)
+    df.to_csv('dataset.csv', mode=mode, index=False, header=columns)
     return df
 
 

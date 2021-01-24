@@ -50,7 +50,7 @@ if __name__ == '__main__':
         rename_dict = {}
         for col in chunk:
             num_test = pd.to_numeric(chunk[col], errors='coerce').sum()
-            if num_test > 0:
+            if abs(num_test) < 1:
                 continue
             else:
                 cols_with_data.append(col)
@@ -60,7 +60,7 @@ if __name__ == '__main__':
                 if col in alias_dict[alias]:
                     rename_dict[col] = alias
         temp_chunk.rename(columns=rename_dict, inplace=True)
-        if sum(temp_chunk.columns.duplicated()) > 1:
+        if sum(temp_chunk.columns.duplicated()) >= 1:
             cols = list(set(temp_chunk.columns[temp_chunk.columns.duplicated()]))
             for col in cols:
                 df = temp_chunk[col]
