@@ -25,6 +25,8 @@ def load_las(filename, counter, col_list):
     df = las.df()
     df['idx'] = counter
     df['md'] = df.index
+    if df['md'].isna().sum() > 0:
+        print('here')
     print(counter)
     if counter == 0:
         mode = 'w'
@@ -36,6 +38,8 @@ def load_las(filename, counter, col_list):
         if col not in df:
             df[col] = np.nan
     df.to_csv('dataset.csv', mode=mode, index=False, header=columns)
+    if df['md'].isna().sum() > 0:
+        print('here')
     return df
 
 
