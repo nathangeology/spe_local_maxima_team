@@ -34,7 +34,8 @@ if __name__ == '__main__':
         # 'NPHIL': ['CNC_LS', 'NPORLS', 'NPHILS', 'NPHI_LS'],
         # 'GR_TH': ['THOR', 'GRT'],
         # 'GR_K': ['POTA'],
-        # 'RHOB': ['RHOB_SLDT', 'ZDEN', 'RHOB'],
+        'RHOB': ['RHOB', 'RXOZ', 'RHOM', #'RHOB_SLDT', 'ZDEN', ],
+                 ],
         # 'PEF': ['PEFL', 'PEFZ', 'PEF', 'PE'],
         'md': ['md'],
         'idx': ['idx']
